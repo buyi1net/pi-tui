@@ -846,8 +846,8 @@ test("关闭自定义 Editor 时 Footer 安装后立即揭示并启动延迟查�
 	});
 	handlers.get("session_start")?.({ type: "session_start", reason: "reload" }, ctx);
 	assert.equal(holding, false);
-	// 第二个 hold 是 session_start 补充的清屏：徃定擦掉竞态期落屏的原生帧。
-	assert.deepEqual(events.slice(0, 5), ["hold", "hold", "footer", "reveal", "branch"]);
+	// 首次 hold 延迟到 session_start，避免项目 Trust 界面被启动过渡门清掉。
+	assert.deepEqual(events.slice(0, 4), ["hold", "footer", "reveal", "branch"]);
 	await new Promise((resolve) => setTimeout(resolve, 10));
 	assert.ok(events.indexOf("exec") > events.indexOf("reveal"));
 	handlers.get("session_shutdown")?.({ type: "session_shutdown", reason: "quit" });

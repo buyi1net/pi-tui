@@ -192,8 +192,6 @@ export function registerPiTuiLifecycle(
 		}, TRANSITION_SETTLE_MS);
 		transitionRevealTimer.unref?.();
 	};
-	transitionGate?.hold();
-
 	pi.registerEntryRenderer?.<PersistedTurnTelemetry>(
 		TURN_TELEMETRY_ENTRY_TYPE,
 		(entry, _options, theme) => {
@@ -569,12 +567,11 @@ export function registerPiTuiLifecycle(
 			transitionGate?.release(true);
 			return;
 		}
-		// 冷启动时模块加载阶段的 hold() 清屏与宿主原生首帧存在竞态：扩展初始化
-		// 早于原生帧落屏，先清后画等于没清，原生编辑框会一直挂到 reveal。
-		// session_start 时宿主 UI 已完全启动，补一次清屏徃定擦掉原生帧，
-		// 闸门继续拦帧到插件界面原子揭示（与 OpenTUI 的过渡页策略对齐）。
-		if (!active && transitionGate?.isHolding()) {
-			transitionGate.hold(installedTui, { clearVisibleScreen: true });
+		// 首次启动必须等宿主完成项目 Trust 等启动前交互后再清屏；过早 hold()
+		// 会把宿主授权界面擦掉。session_start 时宿主 UI 已完全启动，清屏并
+		// 拦帧到插件界面原子揭示（与 OpenTUI 的过渡页策略对齐）。
+		if (!active) {
+			transitionGate?.hold(installedTui, { clearVisibleScreen: true });
 		}
 		if (active) {
 			transitionRevealEnabled = true;

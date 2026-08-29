@@ -4687,7 +4687,6 @@ function registerPiTuiLifecycle(pi, output = process.stdout, dependencies = {}) 
     }, TRANSITION_SETTLE_MS);
     transitionRevealTimer.unref?.();
   };
-  transitionGate?.hold();
   pi.registerEntryRenderer?.(
     TURN_TELEMETRY_ENTRY_TYPE,
     (entry, _options, theme) => {
@@ -5025,8 +5024,8 @@ function registerPiTuiLifecycle(pi, output = process.stdout, dependencies = {}) 
       transitionGate?.release(true);
       return;
     }
-    if (!active && transitionGate?.isHolding()) {
-      transitionGate.hold(installedTui, { clearVisibleScreen: true });
+    if (!active) {
+      transitionGate?.hold(installedTui, { clearVisibleScreen: true });
     }
     if (active) {
       transitionRevealEnabled = true;
