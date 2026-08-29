@@ -7,6 +7,17 @@
 
 export type ProviderGroup = 'official' | 'relay';
 
+/** 内部维护分类；不参与 Pi 界面渲染。 */
+export type ProviderCategory = 'official' | 'major-relay' | 'small-relay' | 'unknown';
+export type MaintenancePriority = 'P0' | 'P1' | 'P2' | 'P3';
+export type ProviderQueryStatus = 'implemented' | 'recognition-only';
+
+export const UNKNOWN_PROVIDER_METADATA = Object.freeze({
+  category: 'unknown' as const,
+  maintenancePriority: 'P3' as const,
+  queryStatus: 'recognition-only' as const,
+});
+
 export type BuiltinQueryKind =
   | 'claude-subscription'
   | 'codex-subscription'
@@ -43,6 +54,10 @@ export interface ProviderCatalogEntry {
   brandId: string;
   displayName: string;
   group: ProviderGroup;
+  /** 内部维护字段；不得传入状态栏或 Header 的展示数据。 */
+  category: Exclude<ProviderCategory, 'unknown'>;
+  maintenancePriority: Exclude<MaintenancePriority, 'P3'>;
+  queryStatus: ProviderQueryStatus;
   /** 仅描述站点、套餐或鉴权差异，不作为供应商品牌展示。 */
   variant?: string;
   /** cc-switch 中的原始预设名称；非预设查询后端为空。 */
@@ -62,6 +77,35 @@ export interface ProviderBrand {
 }
 
 const route = (host: string, pathPrefix?: string): ProviderRoute => ({ host, pathPrefix });
+
+/** 大型中转名单是维护者审核结果，不根据域名、价格或模型数量自动推断。 */
+const MAJOR_RELAY_IDS = new Set([
+  'openrouter',
+  'siliconflow-cn',
+  'siliconflow-en',
+  'novita',
+  'zenmux',
+  'together-ai',
+  'modelscope',
+  'aihubmix',
+]);
+
+function maintenanceMetadata(
+  group: ProviderGroup,
+  id: string,
+  queryKind: BuiltinQueryKind | undefined,
+): Pick<ProviderCatalogEntry, 'category' | 'maintenancePriority' | 'queryStatus'> {
+  const category = group === 'official'
+    ? 'official'
+    : MAJOR_RELAY_IDS.has(id)
+      ? 'major-relay'
+      : 'small-relay';
+  return {
+    category,
+    maintenancePriority: category === 'official' ? 'P0' : category === 'major-relay' ? 'P1' : 'P2',
+    queryStatus: queryKind ? 'implemented' : 'recognition-only',
+  };
+}
 
 const official = (
   id: string,
@@ -84,6 +128,7 @@ const official = (
   queryAccess,
   queryKind,
   aliases,
+  ...maintenanceMetadata('official', id, queryKind),
 });
 
 const relay = (
@@ -107,6 +152,7 @@ const relay = (
   queryAccess,
   queryKind,
   aliases,
+  ...maintenanceMetadata('relay', id, queryKind),
 });
 
 /** 第一方模型厂商、官方云平台及官方订阅。 */
@@ -210,7 +256,7 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
   official('minimax-en', 'MiniMax', 'MiniMax en', [route('api.minimax.io')], 'api-key', 'minimax-en', [], 'minimax', 'International'),
   official('bailing', 'BaiLing', 'BaiLing', [route('api.tbox.cn')]),
   official('github-copilot', 'GitHub Copilot', 'GitHub Copilot', [route('api.githubcopilot.com')], 'host-oauth', 'copilot-subscription'),
-  official('codex', 'Codex', 'Codex', [route('chatgpt.com', '/backend-api')], 'host-oauth', 'codex-subscription', ['openai-codex']),
+  official('codex', 'OpenAI', 'Codex', [route('chatgpt.com', '/backend-api')], 'host-oauth', 'codex-subscription', ['openai-codex']),
   official('xai', 'xAI', 'xAI (Grok)', [route('api.x.ai')], 'host-oauth', 'grok-subscription', ['xAI (Grok) OAuth']),
   official('xiaomi-mimo', 'Xiaomi MiMo', 'Xiaomi MiMo', [route('api.xiaomimimo.com')], 'none', undefined, [], 'xiaomi-mimo', 'API'),
   official(

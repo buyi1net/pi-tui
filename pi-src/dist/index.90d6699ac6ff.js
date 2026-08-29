@@ -24,7 +24,30 @@ import {
 import { join } from "node:path";
 
 // ../packages/shared/provider-catalog.ts
+var UNKNOWN_PROVIDER_METADATA = Object.freeze({
+  category: "unknown",
+  maintenancePriority: "P3",
+  queryStatus: "recognition-only"
+});
 var route = (host, pathPrefix) => ({ host, pathPrefix });
+var MAJOR_RELAY_IDS = /* @__PURE__ */ new Set([
+  "openrouter",
+  "siliconflow-cn",
+  "siliconflow-en",
+  "novita",
+  "zenmux",
+  "together-ai",
+  "modelscope",
+  "aihubmix"
+]);
+function maintenanceMetadata(group, id, queryKind) {
+  const category = group === "official" ? "official" : MAJOR_RELAY_IDS.has(id) ? "major-relay" : "small-relay";
+  return {
+    category,
+    maintenancePriority: category === "official" ? "P0" : category === "major-relay" ? "P1" : "P2",
+    queryStatus: queryKind ? "implemented" : "recognition-only"
+  };
+}
 var official = (id, displayName, presetName, routes, queryAccess = "none", queryKind, aliases = [], brandId = id, variant) => ({
   id,
   brandId,
@@ -35,7 +58,8 @@ var official = (id, displayName, presetName, routes, queryAccess = "none", query
   routes,
   queryAccess,
   queryKind,
-  aliases
+  aliases,
+  ...maintenanceMetadata("official", id, queryKind)
 });
 var relay = (id, displayName, presetName, routes, queryAccess = "generic", queryKind, aliases = [], brandId = id, variant) => ({
   id,
@@ -47,7 +71,8 @@ var relay = (id, displayName, presetName, routes, queryAccess = "generic", query
   routes,
   queryAccess,
   queryKind,
-  aliases
+  aliases,
+  ...maintenanceMetadata("relay", id, queryKind)
 });
 var OFFICIAL_PROVIDERS = [
   official(
@@ -149,7 +174,7 @@ var OFFICIAL_PROVIDERS = [
   official("minimax-en", "MiniMax", "MiniMax en", [route("api.minimax.io")], "api-key", "minimax-en", [], "minimax", "International"),
   official("bailing", "BaiLing", "BaiLing", [route("api.tbox.cn")]),
   official("github-copilot", "GitHub Copilot", "GitHub Copilot", [route("api.githubcopilot.com")], "host-oauth", "copilot-subscription"),
-  official("codex", "Codex", "Codex", [route("chatgpt.com", "/backend-api")], "host-oauth", "codex-subscription", ["openai-codex"]),
+  official("codex", "OpenAI", "Codex", [route("chatgpt.com", "/backend-api")], "host-oauth", "codex-subscription", ["openai-codex"]),
   official("xai", "xAI", "xAI (Grok)", [route("api.x.ai")], "host-oauth", "grok-subscription", ["xAI (Grok) OAuth"]),
   official("xiaomi-mimo", "Xiaomi MiMo", "Xiaomi MiMo", [route("api.xiaomimimo.com")], "none", void 0, [], "xiaomi-mimo", "API"),
   official(
