@@ -99,9 +99,8 @@ function renderCompactHeader(
 	width: number,
 	theme: Theme,
 	glyphs: IconGlyphs,
-	borderColor: (text: string) => string,
 ): string[] {
-	const brand = theme.bold(borderColor(`${glyphs.brand} Pi Tui`));
+	const brand = theme.bold(theme.fg("border", `${glyphs.brand} Pi Tui`));
 	const version = theme.fg("muted", `Pi v${snapshot.version}`);
 	const first = joinSides(brand, version, width);
 	if (width < 32) return [first];
@@ -124,19 +123,18 @@ export function renderCustomHeader(
 	theme: Theme,
 	glyphs: IconGlyphs,
 	logoFrame: PiInstallerLogoFrame = CUSTOM_HEADER_LOGO_FRAMES.at(-1)!,
-	borderColor: (text: string) => string = (text) => theme.fg("border", text),
 ): string[] {
 	if (width <= 0) return [];
 	const paddingX = width >= BANNER_PADDING_X * 2 + 1 ? BANNER_PADDING_X : 0;
 	const contentWidth = Math.max(1, width - paddingX * 2);
 	if (width < BANNER_MIN_WIDTH) {
-		const compact = renderCompactHeader(snapshot, contentWidth, theme, glyphs, borderColor);
+		const compact = renderCompactHeader(snapshot, contentWidth, theme, glyphs);
 		return compact.map((line) => `${" ".repeat(paddingX)}${line}`);
 	}
 
 	const logo = renderLogoFrame(logoFrame, theme).map((line) => theme.bold(line));
 	const logoWidth = PI_INSTALLER_LOGO_WIDTH;
-	const title = `${theme.bold(borderColor("Pi"))}${theme.fg("dim", ` v${snapshot.version}`)}`;
+	const title = `${theme.bold(theme.fg("border", "Pi"))}${theme.fg("dim", ` v${snapshot.version}`)}`;
 	const modelName = formatHeaderModel(snapshot.model);
 	const modelDetails = snapshot.thinking ? `${modelName} · ${snapshot.thinking}` : modelName;
 	const model = theme.fg("dim", modelDetails);

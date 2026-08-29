@@ -2541,8 +2541,8 @@ function alignRowsToBottom(rows, height) {
   const leadingEmptyRows = height - visibleRows.length;
   return Array.from({ length: height }, (_, index) => visibleRows[index - leadingEmptyRows] ?? "");
 }
-function renderCompactHeader(snapshot, width, theme, glyphs, borderColor) {
-  const brand = theme.bold(borderColor(`${glyphs.brand} Pi Tui`));
+function renderCompactHeader(snapshot, width, theme, glyphs) {
+  const brand = theme.bold(theme.fg("border", `${glyphs.brand} Pi Tui`));
   const version = theme.fg("muted", `Pi v${snapshot.version}`);
   const first = joinSides(brand, version, width);
   if (width < 32) return [first];
@@ -2555,17 +2555,17 @@ function renderCompactHeader(snapshot, width, theme, glyphs, borderColor) {
   )}`;
   return [first, joinSides(left, path, width)];
 }
-function renderCustomHeader(snapshot, width, theme, glyphs, logoFrame = CUSTOM_HEADER_LOGO_FRAMES.at(-1), borderColor = (text) => theme.fg("border", text)) {
+function renderCustomHeader(snapshot, width, theme, glyphs, logoFrame = CUSTOM_HEADER_LOGO_FRAMES.at(-1)) {
   if (width <= 0) return [];
   const paddingX = width >= BANNER_PADDING_X * 2 + 1 ? BANNER_PADDING_X : 0;
   const contentWidth = Math.max(1, width - paddingX * 2);
   if (width < BANNER_MIN_WIDTH) {
-    const compact = renderCompactHeader(snapshot, contentWidth, theme, glyphs, borderColor);
+    const compact = renderCompactHeader(snapshot, contentWidth, theme, glyphs);
     return compact.map((line) => `${" ".repeat(paddingX)}${line}`);
   }
   const logo = renderLogoFrame(logoFrame, theme).map((line) => theme.bold(line));
   const logoWidth = PI_INSTALLER_LOGO_WIDTH;
-  const title = `${theme.bold(borderColor("Pi"))}${theme.fg("dim", ` v${snapshot.version}`)}`;
+  const title = `${theme.bold(theme.fg("border", "Pi"))}${theme.fg("dim", ` v${snapshot.version}`)}`;
   const modelName = formatHeaderModel(snapshot.model);
   const modelDetails = snapshot.thinking ? `${modelName} \xB7 ${snapshot.thinking}` : modelName;
   const model = theme.fg("dim", modelDetails);
@@ -2587,24 +2587,22 @@ function renderCustomHeader(snapshot, width, theme, glyphs, logoFrame = CUSTOM_H
 }
 
 // renderer/header.ts
-function renderPiTuiHeader(snapshot, width, theme, glyphs, logoFrame, borderColor) {
-  return renderCustomHeader(snapshot, width, theme, glyphs, logoFrame, borderColor);
+function renderPiTuiHeader(snapshot, width, theme, glyphs, logoFrame) {
+  return renderCustomHeader(snapshot, width, theme, glyphs, logoFrame);
 }
 var PiTuiHeader = class {
   getSnapshot;
   getTheme;
   getGlyphs;
   requestRender;
-  getBorderColor;
   animationFrame = 0;
   animationTimer;
   constructor(getSnapshot, getTheme, getGlyphs, requestRender = () => {
-  }, getBorderColor = () => (text) => this.getTheme().fg("border", text)) {
+  }) {
     this.getSnapshot = getSnapshot;
     this.getTheme = getTheme;
     this.getGlyphs = getGlyphs;
     this.requestRender = requestRender;
-    this.getBorderColor = getBorderColor;
     this.scheduleNextAnimationFrame();
   }
   scheduleNextAnimationFrame() {
@@ -2630,8 +2628,7 @@ var PiTuiHeader = class {
       width,
       this.getTheme(),
       this.getGlyphs(),
-      CUSTOM_HEADER_LOGO_FRAMES[this.animationFrame],
-      this.getBorderColor()
+      CUSTOM_HEADER_LOGO_FRAMES[this.animationFrame]
     );
   }
   dispose() {
@@ -4861,8 +4858,7 @@ function registerPiTuiLifecycle(pi, output = process.stdout, dependencies = {}) 
           }),
           () => ctx.ui.theme,
           getGlyphs,
-          tui.requestRender.bind(tui),
-          () => installedEditor?.borderColor ?? ((text) => ctx.ui.theme.fg("border", text))
+          tui.requestRender.bind(tui)
         ));
         headerInstalled = true;
       }
