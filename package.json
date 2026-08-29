@@ -1,0 +1,37 @@
+{
+  "name": "pi-tui",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Terminal UI enhancements, telemetry, Git status, and provider usage for Pi",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "tui"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/buyi1net/pi-tui.git"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    },
+    "@earendil-works/pi-tui": {
+      "optional": true
+    }
+  },
+  "pi": {
+    "extensions": [
+      "./pi-src/plugin/entry.ts"
+    ]
+  }
+}
