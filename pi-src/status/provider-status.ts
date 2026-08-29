@@ -99,23 +99,22 @@ export function buildEditorProviderSegments(
 	theme: Theme,
 	now = Date.now(),
 ): EditorProviderSegments | null {
-	if (state.status !== "ready") return null;
-	const snapshot = state.snapshot;
-	if (!snapshot) return null;
-	const brand = providerBrand(snapshot.provider.brandName);
+	if (!state.provider) return null;
+	const snapshot = state.status === "ready" ? state.snapshot : null;
+	const brand = providerBrand(state.provider.brandName);
 	return {
 		provider: {
 			id: "provider",
 			text: colorProviderBrand(theme, brand),
 			priority: 4,
 		},
-		balance: snapshot.balance && (snapshot.billingMode === "api" || snapshot.billingMode === "hybrid")
+		balance: snapshot?.balance && (snapshot.billingMode === "api" || snapshot.billingMode === "hybrid")
 			? {
 				id: "balance",
 				text: theme.fg("warning", formatMoney(snapshot.balance.amount, snapshot.balance.currency)),
 				priority: 3,
 			}
 			: null,
-		subscription: buildSubscriptionSegment(state, theme, now),
+		subscription: snapshot ? buildSubscriptionSegment(state, theme, now) : null,
 	};
 }

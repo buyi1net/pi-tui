@@ -273,7 +273,7 @@ test("供应商查询成功后按供应商、模型、思考、余额排列在�
 	assert.doesNotMatch(stripTerminalSequences(editor.render(160)[0] ?? ""), /⏱️ 17s/);
 });
 
-test("供应商查询未成功时编辑框左上角不显示供应商或余额占位", () => {
+test("供应商查询未成功时保留供应商名，但不显示余额占位", () => {
 	for (const status of ["loading", "error", "unsupported"] as const) {
 		const editor = makeEditor(
 			resolveGlyphs("unicode", {}),
@@ -283,7 +283,8 @@ test("供应商查询未成功时编辑框左上角不显示供应商或余额�
 		);
 		editor.setText("x");
 		const top = stripTerminalSequences(editor.render(120)[0] ?? "");
-		assert.doesNotMatch(top, /ApiKey|查询|失败|\$/);
+		assert.match(top, /ApiKey/);
+		assert.doesNotMatch(top, /查询|失败|\$/);
 	}
 });
 

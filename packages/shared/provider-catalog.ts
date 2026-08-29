@@ -216,7 +216,7 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
   official('z.ai', 'Zhipu', 'Zhipu GLM en', [route('api.z.ai')], 'api-key', 'zhipu', [], 'zhipu', 'International'),
   official(
     'baidu-qianfan-coding',
-    'Baidu Qianfan',
+    'Baidu',
     'Baidu Qianfan Coding Plan',
     [route('qianfan.baidubce.com', '/anthropic/coding')],
     'none',
@@ -227,7 +227,7 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
   ),
   official(
     'baidu-qianfan-token-plan',
-    'Baidu Qianfan',
+    'Baidu',
     'Baidu Qianfan Token Plan',
     [route('qianfan.baidubce.com', '/anthropic/tokenplan')],
     'none',
@@ -255,13 +255,13 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
   official('minimax-cn', 'MiniMax', 'MiniMax', [route('api.minimaxi.com')], 'api-key', 'minimax-cn', [], 'minimax', 'China'),
   official('minimax-en', 'MiniMax', 'MiniMax en', [route('api.minimax.io')], 'api-key', 'minimax-en', [], 'minimax', 'International'),
   official('bailing', 'BaiLing', 'BaiLing', [route('api.tbox.cn')]),
-  official('github-copilot', 'GitHub Copilot', 'GitHub Copilot', [route('api.githubcopilot.com')], 'host-oauth', 'copilot-subscription'),
+  official('github-copilot', 'GitHub', 'GitHub Copilot', [route('api.githubcopilot.com')], 'host-oauth', 'copilot-subscription'),
   official('codex', 'OpenAI', 'Codex', [route('chatgpt.com', '/backend-api')], 'host-oauth', 'codex-subscription', ['openai-codex']),
   official('xai', 'xAI', 'xAI (Grok)', [route('api.x.ai')], 'host-oauth', 'grok-subscription', ['xAI (Grok) OAuth']),
-  official('xiaomi-mimo', 'Xiaomi MiMo', 'Xiaomi MiMo', [route('api.xiaomimimo.com')], 'none', undefined, [], 'xiaomi-mimo', 'API'),
+  official('xiaomi-mimo', 'Xiaomi', 'Xiaomi MiMo', [route('api.xiaomimimo.com')], 'none', undefined, [], 'xiaomi-mimo', 'API'),
   official(
     'xiaomi-mimo-token-plan',
-    'Xiaomi MiMo',
+    'Xiaomi',
     'Xiaomi MiMo Token Plan (China)',
     [route('token-plan-cn.xiaomimimo.com')],
     'none',
@@ -270,14 +270,14 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
     'xiaomi-mimo',
     'Token Plan (China)',
   ),
-  official('aws-bedrock-aksk', 'AWS Bedrock', 'AWS Bedrock (AKSK)', [route('*.amazonaws.com')], 'none', undefined, [], 'aws-bedrock', 'AK/SK'),
-  official('aws-bedrock-api-key', 'AWS Bedrock', 'AWS Bedrock (API Key)', [route('*.amazonaws.com')], 'none', undefined, [], 'aws-bedrock', 'API Key'),
+  official('aws-bedrock-aksk', 'AWS', 'AWS Bedrock (AKSK)', [route('bedrock-runtime.*.amazonaws.com')], 'none', undefined, [], 'aws-bedrock', 'AK/SK'),
+  official('aws-bedrock-api-key', 'AWS', 'AWS Bedrock (API Key)', [route('bedrock-runtime.*.amazonaws.com')], 'none', undefined, [], 'aws-bedrock', 'API Key'),
   // cc-switch 其它宿主相对 Claude 目录新增的第一方服务。
   official('openai', 'OpenAI', undefined, [route('api.openai.com')], 'host-oauth', undefined, ['OpenAI Official']),
-  official('azure-openai', 'Azure OpenAI', undefined, [route('*.openai.azure.com')], 'none', undefined, ['Azure OpenAI']),
+  official('azure-openai', 'Azure', undefined, [route('*.openai.azure.com')], 'none', undefined, ['Azure OpenAI']),
   official(
     'tencent-hunyuan',
-    'Tencent Hunyuan',
+    'Tencent',
     undefined,
     [route('tokenhub.tencentmaas.com')],
     'none',
@@ -316,10 +316,14 @@ export const RELAY_PROVIDERS: readonly ProviderCatalogEntry[] = [
     [route('api.apikey.fun'), route('slb.apikey.fun')],
     'api-key',
     'sub2api',
+    ['apikey.fun'],
   ),
   relay('claudeapi', 'ClaudeAPI', 'ClaudeAPI', [route('gw.apito.ai')]),
   relay('code0', 'Code0', 'Code0', [route('code0.ai')]),
-  relay('teamorouter', 'TeamoRouter', 'TeamoRouter', [route('api.teamorouter.com')]),
+  relay('teamorouter', 'TeamoRouter', 'TeamoRouter', [
+	route('api.teamorouter.cn'),
+	route('api.teamorouter.com'),
+]),
   relay('ppio', 'PPIO', 'PPIO', [route('api.ppio.com')]),
   relay('claudecn', 'ClaudeCN', 'ClaudeCN', [route('claudecn.top')]),
   relay(
@@ -371,11 +375,11 @@ export const RELAY_PROVIDERS: readonly ProviderCatalogEntry[] = [
   relay('novita', 'Novita', 'Novita AI', [route('api.novita.ai')], 'api-key', 'novita'),
   relay('nvidia', 'NVIDIA', 'Nvidia', [route('integrate.api.nvidia.com')]),
   relay('pipellm', 'PIPELLM', 'PIPELLM', [route('cc-api.pipellm.ai')]),
-  relay('jiekou', 'JieKou AI', 'JieKou AI', [route('api.jiekou.ai')]),
+  relay('jiekou', 'JieKou', 'JieKou AI', [route('api.jiekou.ai')]),
   // 同一参考提交内有专用 Coding Plan 查询，但没有 Claude 预设。
   relay('zenmux', 'ZenMux', undefined, [route('*.zenmux.ai')], 'generic'),
   // cc-switch 其它宿主相对 Claude 目录新增的聚合/网关服务。
-  relay('together-ai', 'Together AI', undefined, [route('api.together.xyz')], 'generic', undefined, ['Together AI']),
+  relay('together-ai', 'Together', undefined, [route('api.together.xyz')], 'generic', undefined, ['Together AI']),
   relay('new-api', 'New API', undefined, [], 'generic', undefined, ['NewAPI']),
 ];
 
@@ -408,9 +412,9 @@ const PROVIDER_ROUTES = PROVIDER_CATALOG.flatMap((entry) =>
 ).sort((a, b) => Number(Boolean(b.candidate.pathPrefix)) - Number(Boolean(a.candidate.pathPrefix)));
 
 function hostMatches(hostname: string, pattern: string): boolean {
-  if (!pattern.startsWith('*.')) return hostname === pattern;
-  const domain = pattern.slice(2);
-  return hostname === domain || hostname.endsWith(`.${domain}`);
+  if (!pattern.includes('*')) return hostname === pattern;
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^.]+');
+  return new RegExp(`^${escaped}$`).test(hostname);
 }
 
 function routeMatches(url: URL, candidate: ProviderRoute): boolean {
@@ -433,6 +437,9 @@ export function findProviderByUrl(baseUrl: string): ProviderCatalogEntry | null 
 }
 
 export function findProviderById(id: string): ProviderCatalogEntry | null {
-  const normalized = id.toLowerCase();
-  return PROVIDER_CATALOG.find((entry) => entry.id.toLowerCase() === normalized) ?? null;
+  const normalized = id.trim().toLowerCase();
+  return PROVIDER_CATALOG.find((entry) =>
+    entry.id.toLowerCase() === normalized ||
+    entry.aliases?.some((alias) => alias.toLowerCase() === normalized),
+  ) ?? null;
 }

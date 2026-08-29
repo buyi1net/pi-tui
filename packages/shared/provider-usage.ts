@@ -286,6 +286,11 @@ export async function fetchConfiguredProviderUsage(
   request: typeof fetch = fetch,
 ): Promise<ProviderUsage | null> {
   const queryBaseUrl = String(config.baseUrl || inferenceBaseUrl).replace(/\/+$/, '');
+  try {
+    if (new URL(queryBaseUrl).protocol !== 'https:') return null;
+  } catch {
+    return null;
+  }
   const providerId = String(config.id || findProviderByUrl(inferenceBaseUrl)?.id || 'relay');
   const providerLabel = String(config.displayName || providerId);
 

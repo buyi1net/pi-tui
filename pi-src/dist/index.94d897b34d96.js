@@ -134,7 +134,7 @@ var OFFICIAL_PROVIDERS = [
   official("z.ai", "Zhipu", "Zhipu GLM en", [route("api.z.ai")], "api-key", "zhipu", [], "zhipu", "International"),
   official(
     "baidu-qianfan-coding",
-    "Baidu Qianfan",
+    "Baidu",
     "Baidu Qianfan Coding Plan",
     [route("qianfan.baidubce.com", "/anthropic/coding")],
     "none",
@@ -145,7 +145,7 @@ var OFFICIAL_PROVIDERS = [
   ),
   official(
     "baidu-qianfan-token-plan",
-    "Baidu Qianfan",
+    "Baidu",
     "Baidu Qianfan Token Plan",
     [route("qianfan.baidubce.com", "/anthropic/tokenplan")],
     "none",
@@ -173,13 +173,13 @@ var OFFICIAL_PROVIDERS = [
   official("minimax-cn", "MiniMax", "MiniMax", [route("api.minimaxi.com")], "api-key", "minimax-cn", [], "minimax", "China"),
   official("minimax-en", "MiniMax", "MiniMax en", [route("api.minimax.io")], "api-key", "minimax-en", [], "minimax", "International"),
   official("bailing", "BaiLing", "BaiLing", [route("api.tbox.cn")]),
-  official("github-copilot", "GitHub Copilot", "GitHub Copilot", [route("api.githubcopilot.com")], "host-oauth", "copilot-subscription"),
+  official("github-copilot", "GitHub", "GitHub Copilot", [route("api.githubcopilot.com")], "host-oauth", "copilot-subscription"),
   official("codex", "OpenAI", "Codex", [route("chatgpt.com", "/backend-api")], "host-oauth", "codex-subscription", ["openai-codex"]),
   official("xai", "xAI", "xAI (Grok)", [route("api.x.ai")], "host-oauth", "grok-subscription", ["xAI (Grok) OAuth"]),
-  official("xiaomi-mimo", "Xiaomi MiMo", "Xiaomi MiMo", [route("api.xiaomimimo.com")], "none", void 0, [], "xiaomi-mimo", "API"),
+  official("xiaomi-mimo", "Xiaomi", "Xiaomi MiMo", [route("api.xiaomimimo.com")], "none", void 0, [], "xiaomi-mimo", "API"),
   official(
     "xiaomi-mimo-token-plan",
-    "Xiaomi MiMo",
+    "Xiaomi",
     "Xiaomi MiMo Token Plan (China)",
     [route("token-plan-cn.xiaomimimo.com")],
     "none",
@@ -188,14 +188,14 @@ var OFFICIAL_PROVIDERS = [
     "xiaomi-mimo",
     "Token Plan (China)"
   ),
-  official("aws-bedrock-aksk", "AWS Bedrock", "AWS Bedrock (AKSK)", [route("*.amazonaws.com")], "none", void 0, [], "aws-bedrock", "AK/SK"),
-  official("aws-bedrock-api-key", "AWS Bedrock", "AWS Bedrock (API Key)", [route("*.amazonaws.com")], "none", void 0, [], "aws-bedrock", "API Key"),
+  official("aws-bedrock-aksk", "AWS", "AWS Bedrock (AKSK)", [route("bedrock-runtime.*.amazonaws.com")], "none", void 0, [], "aws-bedrock", "AK/SK"),
+  official("aws-bedrock-api-key", "AWS", "AWS Bedrock (API Key)", [route("bedrock-runtime.*.amazonaws.com")], "none", void 0, [], "aws-bedrock", "API Key"),
   // cc-switch 其它宿主相对 Claude 目录新增的第一方服务。
   official("openai", "OpenAI", void 0, [route("api.openai.com")], "host-oauth", void 0, ["OpenAI Official"]),
-  official("azure-openai", "Azure OpenAI", void 0, [route("*.openai.azure.com")], "none", void 0, ["Azure OpenAI"]),
+  official("azure-openai", "Azure", void 0, [route("*.openai.azure.com")], "none", void 0, ["Azure OpenAI"]),
   official(
     "tencent-hunyuan",
-    "Tencent Hunyuan",
+    "Tencent",
     void 0,
     [route("tokenhub.tencentmaas.com")],
     "none",
@@ -231,11 +231,15 @@ var RELAY_PROVIDERS = [
     "APIKEY.FUN",
     [route("api.apikey.fun"), route("slb.apikey.fun")],
     "api-key",
-    "sub2api"
+    "sub2api",
+    ["apikey.fun"]
   ),
   relay("claudeapi", "ClaudeAPI", "ClaudeAPI", [route("gw.apito.ai")]),
   relay("code0", "Code0", "Code0", [route("code0.ai")]),
-  relay("teamorouter", "TeamoRouter", "TeamoRouter", [route("api.teamorouter.com")]),
+  relay("teamorouter", "TeamoRouter", "TeamoRouter", [
+    route("api.teamorouter.cn"),
+    route("api.teamorouter.com")
+  ]),
   relay("ppio", "PPIO", "PPIO", [route("api.ppio.com")]),
   relay("claudecn", "ClaudeCN", "ClaudeCN", [route("claudecn.top")]),
   relay(
@@ -287,11 +291,11 @@ var RELAY_PROVIDERS = [
   relay("novita", "Novita", "Novita AI", [route("api.novita.ai")], "api-key", "novita"),
   relay("nvidia", "NVIDIA", "Nvidia", [route("integrate.api.nvidia.com")]),
   relay("pipellm", "PIPELLM", "PIPELLM", [route("cc-api.pipellm.ai")]),
-  relay("jiekou", "JieKou AI", "JieKou AI", [route("api.jiekou.ai")]),
+  relay("jiekou", "JieKou", "JieKou AI", [route("api.jiekou.ai")]),
   // 同一参考提交内有专用 Coding Plan 查询，但没有 Claude 预设。
   relay("zenmux", "ZenMux", void 0, [route("*.zenmux.ai")], "generic"),
   // cc-switch 其它宿主相对 Claude 目录新增的聚合/网关服务。
-  relay("together-ai", "Together AI", void 0, [route("api.together.xyz")], "generic", void 0, ["Together AI"]),
+  relay("together-ai", "Together", void 0, [route("api.together.xyz")], "generic", void 0, ["Together AI"]),
   relay("new-api", "New API", void 0, [], "generic", void 0, ["NewAPI"])
 ];
 var PROVIDER_CATALOG = [
@@ -317,9 +321,9 @@ var PROVIDER_ROUTES = PROVIDER_CATALOG.flatMap(
   (entry) => entry.routes.map((candidate) => ({ entry, candidate }))
 ).sort((a, b) => Number(Boolean(b.candidate.pathPrefix)) - Number(Boolean(a.candidate.pathPrefix)));
 function hostMatches(hostname, pattern) {
-  if (!pattern.startsWith("*.")) return hostname === pattern;
-  const domain = pattern.slice(2);
-  return hostname === domain || hostname.endsWith(`.${domain}`);
+  if (!pattern.includes("*")) return hostname === pattern;
+  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+");
+  return new RegExp(`^${escaped}$`).test(hostname);
 }
 function routeMatches(url, candidate) {
   if (!hostMatches(url.hostname.toLowerCase(), candidate.host.toLowerCase())) return false;
@@ -338,8 +342,10 @@ function findProviderByUrl(baseUrl) {
   return PROVIDER_ROUTES.find(({ candidate }) => routeMatches(url, candidate))?.entry ?? null;
 }
 function findProviderById(id) {
-  const normalized = id.toLowerCase();
-  return PROVIDER_CATALOG.find((entry) => entry.id.toLowerCase() === normalized) ?? null;
+  const normalized = id.trim().toLowerCase();
+  return PROVIDER_CATALOG.find(
+    (entry) => entry.id.toLowerCase() === normalized || entry.aliases?.some((alias) => alias.toLowerCase() === normalized)
+  ) ?? null;
 }
 
 // ../packages/shared/zhipu.ts
@@ -1107,6 +1113,11 @@ async function requestConfiguredJson(url, headers, request) {
 }
 async function fetchConfiguredProviderUsage(config, inferenceBaseUrl, inferenceApiKey, request = fetch) {
   const queryBaseUrl = String(config.baseUrl || inferenceBaseUrl).replace(/\/+$/, "");
+  try {
+    if (new URL(queryBaseUrl).protocol !== "https:") return null;
+  } catch {
+    return null;
+  }
   const providerId = String(config.id || findProviderByUrl(inferenceBaseUrl)?.id || "relay");
   const providerLabel = String(config.displayName || providerId);
   if (config.protocol === "new-api") {
@@ -2964,8 +2975,10 @@ function collectSessionStatus(sessionManager) {
     let usage;
     if (entry.type === "message" && entry.message.role === "assistant") {
       usage = entry.message.usage;
-      const promptTokens = safeAmount(usage.input) + safeAmount(usage.cacheRead) + safeAmount(usage.cacheWrite);
-      latestCacheHitPercent = promptTokens > 0 ? safeAmount(usage.cacheRead) / promptTokens * 100 : void 0;
+      if (usage) {
+        const promptTokens = safeAmount(usage.input) + safeAmount(usage.cacheRead) + safeAmount(usage.cacheWrite);
+        latestCacheHitPercent = promptTokens > 0 ? safeAmount(usage.cacheRead) / promptTokens * 100 : void 0;
+      }
     } else if (entry.type === "message" && entry.message.role === "toolResult" && entry.message.usage) {
       usage = entry.message.usage;
     } else if ((entry.type === "compaction" || entry.type === "branch_summary") && entry.usage) {
@@ -4219,22 +4232,21 @@ function buildSubscriptionSegment(state, theme, now = Date.now()) {
   };
 }
 function buildEditorProviderSegments(state, theme, now = Date.now()) {
-  if (state.status !== "ready") return null;
-  const snapshot = state.snapshot;
-  if (!snapshot) return null;
-  const brand = providerBrand(snapshot.provider.brandName);
+  if (!state.provider) return null;
+  const snapshot = state.status === "ready" ? state.snapshot : null;
+  const brand = providerBrand(state.provider.brandName);
   return {
     provider: {
       id: "provider",
       text: colorProviderBrand(theme, brand),
       priority: 4
     },
-    balance: snapshot.balance && (snapshot.billingMode === "api" || snapshot.billingMode === "hybrid") ? {
+    balance: snapshot?.balance && (snapshot.billingMode === "api" || snapshot.billingMode === "hybrid") ? {
       id: "balance",
       text: theme.fg("warning", formatMoney(snapshot.balance.amount, snapshot.balance.currency)),
       priority: 3
     } : null,
-    subscription: buildSubscriptionSegment(state, theme, now)
+    subscription: snapshot ? buildSubscriptionSegment(state, theme, now) : null
   };
 }
 

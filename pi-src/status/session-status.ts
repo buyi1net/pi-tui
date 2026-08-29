@@ -98,11 +98,13 @@ export function collectSessionStatus(
 	for (const entry of entries) {
 		let usage: UsageValue | undefined;
 		if (entry.type === "message" && entry.message.role === "assistant") {
-			usage = entry.message.usage as UsageValue;
-			const promptTokens = safeAmount(usage.input) + safeAmount(usage.cacheRead) + safeAmount(usage.cacheWrite);
-			latestCacheHitPercent = promptTokens > 0
-				? (safeAmount(usage.cacheRead) / promptTokens) * 100
-				: undefined;
+			usage = entry.message.usage as UsageValue | undefined;
+			if (usage) {
+				const promptTokens = safeAmount(usage.input) + safeAmount(usage.cacheRead) + safeAmount(usage.cacheWrite);
+				latestCacheHitPercent = promptTokens > 0
+					? (safeAmount(usage.cacheRead) / promptTokens) * 100
+					: undefined;
+			}
 		} else if (entry.type === "message" && entry.message.role === "toolResult" && entry.message.usage) {
 			usage = entry.message.usage as UsageValue;
 		} else if ((entry.type === "compaction" || entry.type === "branch_summary") && entry.usage) {

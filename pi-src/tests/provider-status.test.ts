@@ -116,7 +116,7 @@ test("混合计费同时生成独立余额段和订阅窗口", () => {
 	);
 });
 
-test("旧快照不进入界面，订阅段窄屏紧凑形态去掉重置时间", () => {
+test("旧额度快照不进入界面，但仍保留供应商名；订阅段窄屏紧凑形态去掉重置时间", () => {
 	const stale = state({
 		provider: { id: "zhipu", brandName: "Zhipu" },
 		billingMode: "subscription",
@@ -126,7 +126,11 @@ test("旧快照不进入界面，订阅段窄屏紧凑形态去掉重置时间",
 		freshness: "stale",
 	}, "stale");
 
-	assert.equal(buildEditorProviderSegments(stale, theme), null);
+	const staleSegments = buildEditorProviderSegments(stale, theme);
+	assert.ok(staleSegments);
+	assert.equal(stripTerminalSequences(staleSegments.provider.text), "Zhipu");
+	assert.equal(staleSegments.balance, null);
+	assert.equal(staleSegments.subscription, null);
 
 	const ready = state({ ...stale.snapshot!, freshness: "fresh" });
 	const segment = buildEditorProviderSegments(ready, theme, 1_000)?.subscription;
@@ -141,15 +145,19 @@ test("重置倒计时按分钟、小时和天压缩", () => {
 	assert.equal(formatResetCountdown(176_400_000, 0), "2d1h");
 });
 
-test("查询中、失败和不支持时不占位，成功品牌名不能注入终端控制序列", () => {
+test("查询中、失败和不支持时保留供应商名，但不显示余额或额度占位", () => {
 	const loading: UsageRuntimeState = {
 		status: "loading",
 		provider: { id: "relay", brandName: "Relay\u001b[2J\nInjected" },
 		snapshot: null,
 	};
-	assert.equal(buildEditorProviderSegments(loading, theme), null);
-	assert.equal(buildEditorProviderSegments({ ...loading, status: "error" }, theme), null);
-	assert.equal(buildEditorProviderSegments({ ...loading, status: "unsupported" }, theme), null);
+	for (const status of ["loading", "error", "unsupported"] as const) {
+		const segments = buildEditorProviderSegments({ ...loading, status }, theme);
+		assert.ok(segments);
+		assert.equal(stripTerminalSequences(segments.provider.text), "Relay Injected");
+		assert.equal(segments.balance, null);
+		assert.equal(segments.subscription, null);
+	}
 
 	const ready = state({
 		provider: loading.provider!,

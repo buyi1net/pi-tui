@@ -148,6 +148,27 @@ test("共享运行入口优先执行显式中转查询，并允许查询使用�
 	}
 });
 
+test("显式查询拒绝通过 HTTP 明文发送凭据", async () => {
+	let calls = 0;
+	const access = createProviderAccess({
+		providerId: "relay",
+		endpoint: "https://relay.example/v1",
+		credential: "inference-key",
+		query: {
+			id: "relay-billing",
+			matchHosts: ["relay.example"],
+			protocol: "generic-balance",
+			baseUrl: "http://billing.example",
+		},
+	});
+	const result = await queryProviderUsage(access, async () => {
+		calls += 1;
+		return new Response(JSON.stringify({ balance: 1 }), { status: 200 });
+	});
+	assert.equal(result.status, "failed");
+	assert.equal(calls, 0);
+});
+
 test("Pi adapter 只按显式主机映射传入中转协议和额外凭据", async () => {
 	const model = {
 		provider: "relay",
