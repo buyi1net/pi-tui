@@ -16,8 +16,9 @@ export function renderPiTuiHeader(
 	theme: Theme,
 	glyphs: IconGlyphs,
 	logoFrame?: (typeof CUSTOM_HEADER_LOGO_FRAMES)[number],
+	borderColor?: (text: string) => string,
 ): string[] {
-	return renderCustomHeader(snapshot, width, theme, glyphs, logoFrame);
+	return renderCustomHeader(snapshot, width, theme, glyphs, logoFrame, borderColor);
 }
 
 export class PiTuiHeader implements Component {
@@ -25,6 +26,7 @@ export class PiTuiHeader implements Component {
 	private readonly getTheme: () => Theme;
 	private readonly getGlyphs: () => IconGlyphs;
 	private readonly requestRender: () => void;
+	private readonly getBorderColor: () => (text: string) => string;
 	private animationFrame = 0;
 	private animationTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -33,11 +35,13 @@ export class PiTuiHeader implements Component {
 		getTheme: () => Theme,
 		getGlyphs: () => IconGlyphs,
 		requestRender: () => void = () => {},
+		getBorderColor: () => (text: string) => string = () => (text) => this.getTheme().fg("border", text),
 	) {
 		this.getSnapshot = getSnapshot;
 		this.getTheme = getTheme;
 		this.getGlyphs = getGlyphs;
 		this.requestRender = requestRender;
+		this.getBorderColor = getBorderColor;
 		this.scheduleNextAnimationFrame();
 	}
 
@@ -67,6 +71,7 @@ export class PiTuiHeader implements Component {
 			this.getTheme(),
 			this.getGlyphs(),
 			CUSTOM_HEADER_LOGO_FRAMES[this.animationFrame],
+			this.getBorderColor(),
 		);
 	}
 

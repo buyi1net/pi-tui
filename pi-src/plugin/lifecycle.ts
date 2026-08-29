@@ -391,6 +391,7 @@ export function registerPiTuiLifecycle(
 					() => ctx.ui.theme,
 					getGlyphs,
 					tui.requestRender.bind(tui),
+					() => installedEditor?.borderColor ?? ((text: string) => ctx.ui.theme.fg("border", text)),
 				));
 				headerInstalled = true;
 			}

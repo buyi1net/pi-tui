@@ -13,7 +13,7 @@ function makeAgentDir(name: string, packages: unknown[], extra: Record<string, u
 }
 
 test("不在首位时调整到首位并原子写回", () => {
-	const self = process.cwd();  // 包根 = pi-src
+	const self = process.cwd();  // 包根 = source/pi-src
 	const dir = makeAgentDir("order-a", ["npm:other", self, "git:github.com/x/y"]);
 	const result = ensureFirstPackage(dir, {});
 	assert.equal(result.adjusted, true);
@@ -61,7 +61,7 @@ test("npm source 依据 package.json name 识别自己", () => {
 });
 
 test("已在首位或仅剩自己时零动作", () => {
-	const self = process.cwd();  // 包根 = pi-src
+	const self = process.cwd();  // 包根 = source/pi-src
 	const already = makeAgentDir("order-c", [self, "npm:other"]);
 	assert.equal(ensureFirstPackage(already, {}).adjusted, false);
 	const st = statSync(join(already, "settings.json"));
@@ -70,7 +70,7 @@ test("已在首位或仅剩自己时零动作", () => {
 });
 
 test("退出开关：settings 标记或环境变量都禁用调整", () => {
-	const self = process.cwd();  // 包根 = pi-src
+	const self = process.cwd();  // 包根 = source/pi-src
 	const dir = makeAgentDir("order-d", ["npm:other", self], { piTuiKeepPackageOrder: true });
 	assert.equal(ensureFirstPackage(dir, {}).adjusted, false);
 	const dir2 = makeAgentDir("order-e", ["npm:other", self]);
