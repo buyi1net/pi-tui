@@ -100,7 +100,7 @@ function renderCompactHeader(
 	theme: Theme,
 	glyphs: IconGlyphs,
 ): string[] {
-	const brand = theme.bold(theme.fg("accent", `${glyphs.brand} Pi Tui`));
+	const brand = theme.bold(theme.fg("borderMuted", `${glyphs.brand} Pi Tui`));
 	const version = theme.fg("muted", `Pi v${snapshot.version}`);
 	const first = joinSides(brand, version, width);
 	if (width < 32) return [first];
@@ -134,7 +134,7 @@ export function renderCustomHeader(
 
 	const logo = renderLogoFrame(logoFrame, theme).map((line) => theme.bold(line));
 	const logoWidth = PI_INSTALLER_LOGO_WIDTH;
-	const title = `${theme.bold(theme.fg("accent", "Pi"))}${theme.fg("dim", ` v${snapshot.version}`)}`;
+	const title = `${theme.bold(theme.fg("borderMuted", "Pi"))}${theme.fg("dim", ` v${snapshot.version}`)}`;
 	const modelName = formatHeaderModel(snapshot.model);
 	const modelDetails = snapshot.thinking ? `${modelName} · ${snapshot.thinking}` : modelName;
 	const model = theme.fg("dim", modelDetails);

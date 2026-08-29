@@ -51,7 +51,7 @@ test("Pi 横幅右侧版本和模型与下方信息使用同一灰色层级", ()
 		cwd: "/workspace/demo",
 	}, 80, colorTheme, resolveGlyphs("unicode", {}));
 
-	assert.ok(calls.some(([color, text]) => color === "accent" && text === "Pi"));
+	assert.ok(calls.some(([color, text]) => color === "borderMuted" && text === "Pi"));
 	assert.ok(calls.some(([color, text]) => color === "dim" && text === " v0.84.3"));
 	assert.ok(calls.some(([color, text]) => color === "dim" && text === "glm-5.3 · max"));
 	assert.ok(calls.some(([color, text]) => color === "dim" && text === "/workspace/demo"));
