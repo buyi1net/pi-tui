@@ -91,7 +91,22 @@ test("Pi 横幅组件使用官方安装器的完整方块动画并能停止动�
 	header.dispose();
 });
 
-test("Pi 横幅在窄屏退化为单行且不越界", () => {
+test("Pi 横幅在窄屏保留 Logo 动画并裁剪右侧信息", () => {
+	for (const width of [32, 40, 60]) {
+		const lines = renderPiTuiHeader({
+			version: "0.84.3",
+			model: "provider/a-very-long-model-name",
+			thinking: "high",
+			cwd: "/a/very/long/project/path",
+		}, width, theme, resolveGlyphs("ascii", {}));
+		assert.equal(lines.length, 4);
+		assert.match(stripTerminalSequences(lines[0] ?? ""), /█/);
+		assert.ok(visibleWidth(lines[0] ?? "") <= width);
+		assert.ok(visibleWidth(lines[3] ?? "") <= width);
+	}
+});
+
+test("Pi 横幅在极窄屏退化为单行且不越界", () => {
 	for (const width of [8, 16, 24, 31]) {
 		const lines = renderPiTuiHeader({
 			version: "0.84.3",

@@ -2523,7 +2523,7 @@ var PI_INSTALLER_LOGO_DURATIONS_MS = animationFrames.map(({ durationMs }) => dur
 var PI_INSTALLER_LOGO_WIDTH = Math.max(...PI_INSTALLER_LOGO_FRAMES.map(frameWidth));
 
 // renderer/custom-header.ts
-var BANNER_MIN_WIDTH = 64;
+var BANNER_MIN_WIDTH = 32;
 var BANNER_GAP = 1;
 var BANNER_PADDING_X = 1;
 var CUSTOM_HEADER_LOGO_FRAMES = PI_INSTALLER_LOGO_FRAMES;

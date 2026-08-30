@@ -16,7 +16,7 @@ import {
  * 参考：https://github.com/amosblomqvist/pi-config/blob/main/extensions/custom-header.ts
  */
 
-const BANNER_MIN_WIDTH = 64;
+const BANNER_MIN_WIDTH = 32;
 const BANNER_GAP = 1;
 const BANNER_PADDING_X = 1;
 export const CUSTOM_HEADER_LOGO_FRAMES = PI_INSTALLER_LOGO_FRAMES;
