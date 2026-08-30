@@ -123,10 +123,10 @@ test("会话轮数按 1-10 灰、11-20 绿、21-39 黄、40+ 红分档", () => {
 	assert.equal(turnStatusColor(100), "error");
 });
 
-test("压缩次数按 0-1 灰、2-3 黄、4+ 红分档", () => {
+test("压缩次数按 0 灰、1 绿、2 蓝、3 黄、3 次以上红分档", () => {
 	assert.equal(compactionStatusColor(0), "muted");
-	assert.equal(compactionStatusColor(1), "muted");
-	assert.equal(compactionStatusColor(2), "warning");
+	assert.equal(compactionStatusColor(1), "success");
+	assert.equal(compactionStatusColor(2), "accent");
 	assert.equal(compactionStatusColor(3), "warning");
 	assert.equal(compactionStatusColor(4), "error");
 	assert.equal(compactionStatusColor(10), "error");

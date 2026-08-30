@@ -158,8 +158,10 @@ export function turnStatusColor(turns: number): ThemeColor {
 }
 
 export function compactionStatusColor(compactions: number): ThemeColor {
-	if (!Number.isFinite(compactions) || compactions <= 1) return "muted";
-	if (compactions < 4) return "warning";
+	if (!Number.isFinite(compactions) || compactions <= 0) return "muted";
+	if (compactions === 1) return "success";
+	if (compactions === 2) return "accent";
+	if (compactions === 3) return "warning";
 	return "error";
 }
 
