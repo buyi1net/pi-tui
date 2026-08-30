@@ -112,7 +112,7 @@ export function parseNovitaBalance(json: any): BalanceValue | null {
 }
 
 export function parseKimiBalance(json: any, international = false): BalanceValue | null {
-  if (json?.code !== 0 || !json?.data) return null;
+  if ((json?.code !== 0 && json?.code !== '0') || !json?.data) return null;
   const amount = numberValue(json.data.available_balance);
   return amount == null
     ? null
@@ -120,9 +120,12 @@ export function parseKimiBalance(json: any, international = false): BalanceValue
 }
 
 export function parseKimiQuota(json: any): QuotaInfo | null {
+  // 官方接口当前返回裸对象；兼容网关包裹在 data 下的同一响应，
+  // 但不把普通余额响应误认为套餐额度。
+  const payload = json?.data && (json.data.usage || json.data.limits) ? json.data : json;
   const windows: QuotaWindow[] = [];
-  const detail = Array.isArray(json?.limits)
-    ? json.limits.map((item: any) => item?.detail).find((item: any) => item && numberValue(item.limit) != null)
+  const detail = Array.isArray(payload?.limits)
+    ? payload.limits.map((item: any) => item?.detail).find((item: any) => item && numberValue(item.limit) != null)
     : null;
   if (detail) {
     const limit = numberValue(detail.limit);
@@ -131,10 +134,10 @@ export function parseKimiQuota(json: any): QuotaInfo | null {
       windows.push(remainingWindow('5h', (remaining / limit) * 100, detail.resetTime));
     }
   }
-  const weeklyLimit = numberValue(json?.usage?.limit);
-  const weeklyRemaining = numberValue(json?.usage?.remaining);
+  const weeklyLimit = numberValue(payload?.usage?.limit);
+  const weeklyRemaining = numberValue(payload?.usage?.remaining);
   if (weeklyLimit != null && weeklyLimit > 0 && weeklyRemaining != null) {
-    windows.push(remainingWindow('7d', (weeklyRemaining / weeklyLimit) * 100, json.usage.resetTime));
+    windows.push(remainingWindow('7d', (weeklyRemaining / weeklyLimit) * 100, payload.usage.resetTime));
   }
   return windows.length > 0 ? { provider: 'kimi', windows } : null;
 }
@@ -468,7 +471,19 @@ export async function fetchProviderUsage(
   }
   if (kind === 'kimi-coding') {
     const quota = parseKimiQuota(json);
-    return quota ? { mode: 'subscription', quota } : null;
+    // Kimi Code 与 Kimi 开放平台是两套计费产品，但 Pi 目前只有
+    // api.kimi.com/coding 这个模型入口。对 Coding Key，第一请求返回套餐窗口；
+    // 对普通 Open Platform Key，套餐接口会返回 401，此时同一 Key 仍可能有普通余额。
+    // 两个查询都限定为 Kimi 官方域名，成功项按 hybrid/api/subscription 归一化。
+    const balanceJson = await requestJson(
+      'https://api.moonshot.cn/v1/users/me/balance',
+      apiKey,
+      request,
+    );
+    const balance = parseKimiBalance(balanceJson);
+    if (quota && balance) return { mode: 'hybrid', balance, quota };
+    if (quota) return { mode: 'subscription', quota };
+    return balance ? { mode: 'api', balance } : null;
   }
   if (kind === 'minimax-cn' || kind === 'minimax-en') {
     const quota = parseMiniMaxQuota(json);

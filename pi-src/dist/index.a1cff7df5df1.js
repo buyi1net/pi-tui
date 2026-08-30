@@ -1002,13 +1002,14 @@ function parseNovitaBalance(json) {
   return units == null ? null : { amount: units / 1e4, currency: "USD" };
 }
 function parseKimiBalance(json, international = false) {
-  if (json?.code !== 0 || !json?.data) return null;
+  if (json?.code !== 0 && json?.code !== "0" || !json?.data) return null;
   const amount = numberValue3(json.data.available_balance);
   return amount == null ? null : { amount, currency: international ? "USD" : "CNY" };
 }
 function parseKimiQuota(json) {
+  const payload = json?.data && (json.data.usage || json.data.limits) ? json.data : json;
   const windows = [];
-  const detail = Array.isArray(json?.limits) ? json.limits.map((item) => item?.detail).find((item) => item && numberValue3(item.limit) != null) : null;
+  const detail = Array.isArray(payload?.limits) ? payload.limits.map((item) => item?.detail).find((item) => item && numberValue3(item.limit) != null) : null;
   if (detail) {
     const limit = numberValue3(detail.limit);
     const remaining = numberValue3(detail.remaining);
@@ -1016,10 +1017,10 @@ function parseKimiQuota(json) {
       windows.push(remainingWindow("5h", remaining / limit * 100, detail.resetTime));
     }
   }
-  const weeklyLimit = numberValue3(json?.usage?.limit);
-  const weeklyRemaining = numberValue3(json?.usage?.remaining);
+  const weeklyLimit = numberValue3(payload?.usage?.limit);
+  const weeklyRemaining = numberValue3(payload?.usage?.remaining);
   if (weeklyLimit != null && weeklyLimit > 0 && weeklyRemaining != null) {
-    windows.push(remainingWindow("7d", weeklyRemaining / weeklyLimit * 100, json.usage.resetTime));
+    windows.push(remainingWindow("7d", weeklyRemaining / weeklyLimit * 100, payload.usage.resetTime));
   }
   return windows.length > 0 ? { provider: "kimi", windows } : null;
 }
@@ -1293,7 +1294,15 @@ async function fetchProviderUsage(kind, baseUrl, apiKey, request = fetch, option
   }
   if (kind === "kimi-coding") {
     const quota = parseKimiQuota(json);
-    return quota ? { mode: "subscription", quota } : null;
+    const balanceJson = await requestJson(
+      "https://api.moonshot.cn/v1/users/me/balance",
+      apiKey,
+      request
+    );
+    const balance = parseKimiBalance(balanceJson);
+    if (quota && balance) return { mode: "hybrid", balance, quota };
+    if (quota) return { mode: "subscription", quota };
+    return balance ? { mode: "api", balance } : null;
   }
   if (kind === "minimax-cn" || kind === "minimax-en") {
     const quota = parseMiniMaxQuota(json);
