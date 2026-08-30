@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Terminal UI enhancements, telemetry, Git status, and provider usage for Pi",
+  "description": "Terminal UI enhancements, telemetry, Git status, provider usage, and themes for Pi",
   "engines": {
     "node": ">=22.19.0"
   },
@@ -32,6 +32,9 @@
   "pi": {
     "extensions": [
       "./pi-src/plugin/entry.ts"
+    ],
+    "themes": [
+      "./pi-src/themes"
     ]
   }
 }
