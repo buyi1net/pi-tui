@@ -25,6 +25,7 @@ export type BuiltinQueryKind =
   | 'copilot-subscription'
   | 'grok-subscription'
   | 'zhipu'
+  | 'kimi-api'
   | 'kimi-coding'
   | 'volcengine-agent'
   | 'volcengine-coding'
@@ -167,7 +168,28 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
     'claude-subscription',
     ['Claude Desktop Official'],
   ),
-  official('kimi-api', 'Kimi', 'Kimi', [route('api.moonshot.cn')], 'none', undefined, [], 'kimi', 'API'),
+  official(
+    'kimi-api-cn',
+    'Kimi',
+    'Kimi',
+    [route('api.moonshot.cn')],
+    'api-key',
+    'kimi-api',
+    [],
+    'kimi',
+    'API (China)',
+  ),
+  official(
+    'kimi-api-en',
+    'Kimi',
+    undefined,
+    [route('api.moonshot.ai')],
+    'api-key',
+    'kimi-api',
+    [],
+    'kimi',
+    'API (International)',
+  ),
   official(
     'kimi',
     'Kimi',

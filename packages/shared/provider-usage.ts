@@ -111,6 +111,14 @@ export function parseNovitaBalance(json: any): BalanceValue | null {
   return units == null ? null : { amount: units / 10_000, currency: 'USD' };
 }
 
+export function parseKimiBalance(json: any, international = false): BalanceValue | null {
+  if (json?.code !== 0 || !json?.data) return null;
+  const amount = numberValue(json.data.available_balance);
+  return amount == null
+    ? null
+    : { amount, currency: international ? 'USD' : 'CNY' };
+}
+
 export function parseKimiQuota(json: any): QuotaInfo | null {
   const windows: QuotaWindow[] = [];
   const detail = Array.isArray(json?.limits)
@@ -431,7 +439,14 @@ export async function fetchProviderUsage(
   }
 
   let url: string;
-  if (kind === 'kimi-coding') url = 'https://api.kimi.com/coding/v1/usages';
+  if (kind === 'kimi-api') {
+    try {
+      const origin = new URL(baseUrl).origin;
+      url = `${origin}/v1/users/me/balance`;
+    } catch {
+      return null;
+    }
+  } else if (kind === 'kimi-coding') url = 'https://api.kimi.com/coding/v1/usages';
   else if (kind === 'minimax-cn') url = 'https://api.minimaxi.com/v1/api/openplatform/coding_plan/remains';
   else if (kind === 'minimax-en') url = 'https://api.minimax.io/v1/api/openplatform/coding_plan/remains';
   else if (kind === 'stepfun') url = 'https://api.stepfun.com/v1/accounts';
@@ -446,6 +461,11 @@ export async function fetchProviderUsage(
   }
 
   const json = await requestJson(url, apiKey, request);
+  if (kind === 'kimi-api') {
+    const international = new URL(baseUrl).hostname === 'api.moonshot.ai';
+    const balance = parseKimiBalance(json, international);
+    return balance ? { mode: 'api', balance } : null;
+  }
   if (kind === 'kimi-coding') {
     const quota = parseKimiQuota(json);
     return quota ? { mode: 'subscription', quota } : null;

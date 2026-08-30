@@ -84,7 +84,28 @@ var OFFICIAL_PROVIDERS = [
     "claude-subscription",
     ["Claude Desktop Official"]
   ),
-  official("kimi-api", "Kimi", "Kimi", [route("api.moonshot.cn")], "none", void 0, [], "kimi", "API"),
+  official(
+    "kimi-api-cn",
+    "Kimi",
+    "Kimi",
+    [route("api.moonshot.cn")],
+    "api-key",
+    "kimi-api",
+    [],
+    "kimi",
+    "API (China)"
+  ),
+  official(
+    "kimi-api-en",
+    "Kimi",
+    void 0,
+    [route("api.moonshot.ai")],
+    "api-key",
+    "kimi-api",
+    [],
+    "kimi",
+    "API (International)"
+  ),
   official(
     "kimi",
     "Kimi",
@@ -980,6 +1001,11 @@ function parseNovitaBalance(json) {
   const units = numberValue3(json?.availableBalance);
   return units == null ? null : { amount: units / 1e4, currency: "USD" };
 }
+function parseKimiBalance(json, international = false) {
+  if (json?.code !== 0 || !json?.data) return null;
+  const amount = numberValue3(json.data.available_balance);
+  return amount == null ? null : { amount, currency: international ? "USD" : "CNY" };
+}
 function parseKimiQuota(json) {
   const windows = [];
   const detail = Array.isArray(json?.limits) ? json.limits.map((item) => item?.detail).find((item) => item && numberValue3(item.limit) != null) : null;
@@ -1239,7 +1265,14 @@ async function fetchProviderUsage(kind, baseUrl, apiKey, request = fetch, option
     return quota ? { mode: "subscription", quota } : null;
   }
   let url;
-  if (kind === "kimi-coding") url = "https://api.kimi.com/coding/v1/usages";
+  if (kind === "kimi-api") {
+    try {
+      const origin = new URL(baseUrl).origin;
+      url = `${origin}/v1/users/me/balance`;
+    } catch {
+      return null;
+    }
+  } else if (kind === "kimi-coding") url = "https://api.kimi.com/coding/v1/usages";
   else if (kind === "minimax-cn") url = "https://api.minimaxi.com/v1/api/openplatform/coding_plan/remains";
   else if (kind === "minimax-en") url = "https://api.minimax.io/v1/api/openplatform/coding_plan/remains";
   else if (kind === "stepfun") url = "https://api.stepfun.com/v1/accounts";
@@ -1253,6 +1286,11 @@ async function fetchProviderUsage(kind, baseUrl, apiKey, request = fetch, option
     url = usageUrl;
   }
   const json = await requestJson(url, apiKey, request);
+  if (kind === "kimi-api") {
+    const international = new URL(baseUrl).hostname === "api.moonshot.ai";
+    const balance = parseKimiBalance(json, international);
+    return balance ? { mode: "api", balance } : null;
+  }
   if (kind === "kimi-coding") {
     const quota = parseKimiQuota(json);
     return quota ? { mode: "subscription", quota } : null;
