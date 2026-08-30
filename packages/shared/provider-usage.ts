@@ -225,6 +225,30 @@ async function requestJson(url: string, apiKey: string, request: typeof fetch): 
   return response.json().catch(() => null);
 }
 
+function miniMaxQuotaUrls(kind: 'minimax-cn' | 'minimax-en'): string[] {
+  const international = kind === 'minimax-en';
+  const host = international ? 'minimax.io' : 'minimaxi.com';
+  const apiHost = international ? 'api.minimax.io' : 'api.minimaxi.com';
+  // Token Plan 新接口优先；保留旧 Coding Plan 路径兼容仍使用旧版接口的账户。
+  return [
+    `https://www.${host}/v1/token_plan/remains`,
+    `https://${apiHost}/v1/api/openplatform/coding_plan/remains`,
+  ];
+}
+
+async function fetchMiniMaxQuota(
+  kind: 'minimax-cn' | 'minimax-en',
+  apiKey: string,
+  request: typeof fetch,
+): Promise<QuotaInfo | null> {
+  for (const url of miniMaxQuotaUrls(kind)) {
+    const json = await requestJson(url, apiKey, request).catch(() => null);
+    const quota = parseMiniMaxQuota(json);
+    if (quota) return quota;
+  }
+  return null;
+}
+
 function matchesConfiguredHost(hostname: string, pattern: string): boolean {
   const normalized = pattern.trim().toLowerCase();
   if (!normalized) return false;
@@ -440,6 +464,11 @@ export async function fetchProviderUsage(
     return quota ? { mode: 'subscription', quota } : null;
   }
 
+  if (kind === 'minimax-cn' || kind === 'minimax-en') {
+    const quota = await fetchMiniMaxQuota(kind, apiKey, request);
+    return quota ? { mode: 'subscription', quota } : null;
+  }
+
   let url: string;
   if (kind === 'kimi-api') {
     try {
@@ -449,8 +478,6 @@ export async function fetchProviderUsage(
       return null;
     }
   } else if (kind === 'kimi-coding') url = 'https://api.kimi.com/coding/v1/usages';
-  else if (kind === 'minimax-cn') url = 'https://api.minimaxi.com/v1/api/openplatform/coding_plan/remains';
-  else if (kind === 'minimax-en') url = 'https://api.minimax.io/v1/api/openplatform/coding_plan/remains';
   else if (kind === 'stepfun') url = 'https://api.stepfun.com/v1/accounts';
   else if (kind === 'siliconflow-cn') url = 'https://api.siliconflow.cn/v1/user/info';
   else if (kind === 'siliconflow-en') url = 'https://api.siliconflow.com/v1/user/info';
@@ -482,10 +509,6 @@ export async function fetchProviderUsage(
     );
     const balance = parseKimiBalance(balanceJson);
     return balance ? { mode: 'api', balance } : null;
-  }
-  if (kind === 'minimax-cn' || kind === 'minimax-en') {
-    const quota = parseMiniMaxQuota(json);
-    return quota ? { mode: 'subscription', quota } : null;
   }
   if (kind === 'stepfun') {
     const balance = parseStepFunBalance(json);
