@@ -408,16 +408,15 @@ export async function fetchProviderUsage(
 
   if (kind === 'zhipu') {
     const team = options.credentials?.zhipuTeam;
-    if (team) {
-      const quota = await fetchZhipuTeamQuota(
-        apiKey,
-        team.organizationId,
-        team.projectId,
-        request,
-      ).catch(() => null);
-      return quota ? { mode: 'subscription', quota } : null;
-    }
-    const quota = await fetchZhipuQuota(baseUrl, apiKey, request).catch(() => null);
+    const quota = team
+      ? await fetchZhipuTeamQuota(
+          apiKey,
+          team.organizationId,
+          team.projectId,
+          request,
+        ).catch(() => null)
+      : await fetchZhipuQuota(baseUrl, apiKey, request).catch(() => null);
+    // 订阅接口只要返回有效窗口（包括剩余 0%），就优先展示并停止后续余额查询。
     if (quota) return { mode: 'subscription', quota };
     // Zhipu 国际站没有已确认的余额接口；不能把国际站 Key 发送到国内 bigmodel.cn。
     if (new URL(baseUrl).hostname === 'api.z.ai') return null;
@@ -472,17 +471,16 @@ export async function fetchProviderUsage(
   if (kind === 'kimi-coding') {
     const quota = parseKimiQuota(json);
     // Kimi Code 与 Kimi 开放平台是两套计费产品，但 Pi 目前只有
-    // api.kimi.com/coding 这个模型入口。对 Coding Key，第一请求返回套餐窗口；
+    // api.kimi.com/coding 这个模型入口。只要套餐接口返回有效窗口，
+    // 无论剩余百分比是否为 0，都直接展示订阅信息，不再查询普通余额。
+    if (quota) return { mode: 'subscription', quota };
     // 对普通 Open Platform Key，套餐接口会返回 401，此时同一 Key 仍可能有普通余额。
-    // 两个查询都限定为 Kimi 官方域名，成功项按 hybrid/api/subscription 归一化。
     const balanceJson = await requestJson(
       'https://api.moonshot.cn/v1/users/me/balance',
       apiKey,
       request,
     );
     const balance = parseKimiBalance(balanceJson);
-    if (quota && balance) return { mode: 'hybrid', balance, quota };
-    if (quota) return { mode: 'subscription', quota };
     return balance ? { mode: 'api', balance } : null;
   }
   if (kind === 'minimax-cn' || kind === 'minimax-en') {

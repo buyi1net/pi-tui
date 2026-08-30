@@ -1234,16 +1234,12 @@ async function fetchProviderUsage(kind, baseUrl, apiKey, request = fetch, option
   if (kind === "unknown" || !apiKey && !kind.startsWith("volcengine-")) return null;
   if (kind === "zhipu") {
     const team = options.credentials?.zhipuTeam;
-    if (team) {
-      const quota2 = await fetchZhipuTeamQuota(
-        apiKey,
-        team.organizationId,
-        team.projectId,
-        request
-      ).catch(() => null);
-      return quota2 ? { mode: "subscription", quota: quota2 } : null;
-    }
-    const quota = await fetchZhipuQuota(baseUrl, apiKey, request).catch(() => null);
+    const quota = team ? await fetchZhipuTeamQuota(
+      apiKey,
+      team.organizationId,
+      team.projectId,
+      request
+    ).catch(() => null) : await fetchZhipuQuota(baseUrl, apiKey, request).catch(() => null);
     if (quota) return { mode: "subscription", quota };
     if (new URL(baseUrl).hostname === "api.z.ai") return null;
     const amount = await fetchZhipuBalance(apiKey, request).catch(() => null);
@@ -1294,14 +1290,13 @@ async function fetchProviderUsage(kind, baseUrl, apiKey, request = fetch, option
   }
   if (kind === "kimi-coding") {
     const quota = parseKimiQuota(json);
+    if (quota) return { mode: "subscription", quota };
     const balanceJson = await requestJson(
       "https://api.moonshot.cn/v1/users/me/balance",
       apiKey,
       request
     );
     const balance = parseKimiBalance(balanceJson);
-    if (quota && balance) return { mode: "hybrid", balance, quota };
-    if (quota) return { mode: "subscription", quota };
     return balance ? { mode: "api", balance } : null;
   }
   if (kind === "minimax-cn" || kind === "minimax-en") {
