@@ -208,6 +208,9 @@ function readProviderAccess(value: unknown): PiProviderAccessConfig | undefined 
 	const zhipuTeamValue = credentialsValue.zhipuTeam === undefined
 		? undefined
 		: requireRecord(credentialsValue.zhipuTeam, "data.providerAccess.credentials.zhipuTeam");
+	const openrouterValue = credentialsValue.openrouter === undefined
+		? undefined
+		: requireRecord(credentialsValue.openrouter, "data.providerAccess.credentials.openrouter");
 	const credentials = {
 		...(volcengineValue ? {
 			volcengine: {
@@ -219,6 +222,11 @@ function readProviderAccess(value: unknown): PiProviderAccessConfig | undefined 
 			zhipuTeam: {
 				organizationId: requiredString(zhipuTeamValue.organizationId, "data.providerAccess.credentials.zhipuTeam.organizationId"),
 				projectId: requiredString(zhipuTeamValue.projectId, "data.providerAccess.credentials.zhipuTeam.projectId"),
+			},
+		} : {}),
+		...(openrouterValue ? {
+			openrouter: {
+				managementKey: requiredSecret(openrouterValue.managementKey, "data.providerAccess.credentials.openrouter.managementKey"),
 			},
 		} : {}),
 	};

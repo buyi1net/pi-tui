@@ -1248,7 +1248,8 @@ async function fetchProviderUsage(kind, baseUrl, apiKey, request = fetch, option
   if (kind === "grok-subscription") {
     return fetchGrokSubscription(options.oauthToken ?? "", request).catch(() => null);
   }
-  if (kind === "unknown" || !apiKey && !kind.startsWith("volcengine-")) return null;
+  const openRouterManagementKey = options.credentials?.openrouter?.managementKey ?? "";
+  if (kind === "unknown" || !apiKey && !kind.startsWith("volcengine-") && !(kind === "openrouter" && openRouterManagementKey)) return null;
   if (kind === "zhipu") {
     const team = options.credentials?.zhipuTeam;
     const quota = team ? await fetchZhipuTeamQuota(
@@ -1295,13 +1296,15 @@ async function fetchProviderUsage(kind, baseUrl, apiKey, request = fetch, option
   else if (kind === "siliconflow-cn") url = "https://api.siliconflow.cn/v1/user/info";
   else if (kind === "siliconflow-en") url = "https://api.siliconflow.com/v1/user/info";
   else if (kind === "openrouter") url = "https://openrouter.ai/api/v1/credits";
-  else if (kind === "novita") url = "https://api.novita.ai/v3/user/balance";
+  else if (kind === "novita") url = "https://api.novita.ai/openapi/v1/billing/balance/detail";
   else {
     const usageUrl = sub2ApiUsageUrl(baseUrl);
     if (!usageUrl) return null;
     url = usageUrl;
   }
-  const json = await requestJson(url, apiKey, request);
+  const queryApiKey = kind === "openrouter" ? options.credentials?.openrouter?.managementKey ?? "" : apiKey;
+  if (!queryApiKey) return null;
+  const json = await requestJson(url, queryApiKey, request);
   if (kind === "kimi-api") {
     const international = new URL(baseUrl).hostname === "api.moonshot.ai";
     const balance = parseKimiBalance(json, international);
@@ -3661,6 +3664,7 @@ function readProviderAccess(value) {
   const credentialsValue = optionalRecord(access.credentials, "data.providerAccess.credentials");
   const volcengineValue = credentialsValue.volcengine === void 0 ? void 0 : requireRecord(credentialsValue.volcengine, "data.providerAccess.credentials.volcengine");
   const zhipuTeamValue = credentialsValue.zhipuTeam === void 0 ? void 0 : requireRecord(credentialsValue.zhipuTeam, "data.providerAccess.credentials.zhipuTeam");
+  const openrouterValue = credentialsValue.openrouter === void 0 ? void 0 : requireRecord(credentialsValue.openrouter, "data.providerAccess.credentials.openrouter");
   const credentials = {
     ...volcengineValue ? {
       volcengine: {
@@ -3672,6 +3676,11 @@ function readProviderAccess(value) {
       zhipuTeam: {
         organizationId: requiredString(zhipuTeamValue.organizationId, "data.providerAccess.credentials.zhipuTeam.organizationId"),
         projectId: requiredString(zhipuTeamValue.projectId, "data.providerAccess.credentials.zhipuTeam.projectId")
+      }
+    } : {},
+    ...openrouterValue ? {
+      openrouter: {
+        managementKey: requiredSecret(openrouterValue.managementKey, "data.providerAccess.credentials.openrouter.managementKey")
       }
     } : {}
   };

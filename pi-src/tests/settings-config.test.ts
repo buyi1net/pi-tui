@@ -59,6 +59,7 @@ test("供应商访问配置只接受显式协议、主机映射和控制面凭�
 				}],
 				credentials: {
 					volcengine: { accessKeyId: "ak", secretAccessKey: "sk" },
+					openrouter: { managementKey: "management-key" },
 				},
 				githubDomain: "github.enterprise.example",
 			},
@@ -66,6 +67,7 @@ test("供应商访问配置只接受显式协议、主机映射和控制面凭�
 	});
 	assert.equal(config.data.providerAccess?.queries?.[0]?.id, "relay");
 	assert.equal(config.data.providerAccess?.credentials?.volcengine?.accessKeyId, "ak");
+	assert.equal(config.data.providerAccess?.credentials?.openrouter?.managementKey, "management-key");
 	assert.equal(config.data.providerAccess?.githubDomain, "github.enterprise.example");
 	assert.throws(
 		() => parsePiTuiConfig({
@@ -84,6 +86,13 @@ test("供应商访问配置只接受显式协议、主机映射和控制面凭�
 			data: { providerAccess: { githubDomain: "github.example/path" } },
 		}),
 		/data\.providerAccess\.githubDomain/,
+	);
+	assert.throws(
+		() => parsePiTuiConfig({
+			schemaVersion: 1,
+			data: { providerAccess: { credentials: { openrouter: {} } } },
+		}),
+		/data\.providerAccess\.credentials\.openrouter\.managementKey/,
 	);
 });
 

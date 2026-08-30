@@ -428,7 +428,11 @@ export async function fetchProviderUsage(
   if (kind === 'grok-subscription') {
     return fetchGrokSubscription(options.oauthToken ?? '', request).catch(() => null);
   }
-  if (kind === 'unknown' || (!apiKey && !kind.startsWith('volcengine-'))) return null;
+  const openRouterManagementKey = options.credentials?.openrouter?.managementKey ?? '';
+  if (
+    kind === 'unknown' ||
+    (!apiKey && !kind.startsWith('volcengine-') && !(kind === 'openrouter' && openRouterManagementKey))
+  ) return null;
 
   if (kind === 'zhipu') {
     const team = options.credentials?.zhipuTeam;
@@ -482,14 +486,18 @@ export async function fetchProviderUsage(
   else if (kind === 'siliconflow-cn') url = 'https://api.siliconflow.cn/v1/user/info';
   else if (kind === 'siliconflow-en') url = 'https://api.siliconflow.com/v1/user/info';
   else if (kind === 'openrouter') url = 'https://openrouter.ai/api/v1/credits';
-  else if (kind === 'novita') url = 'https://api.novita.ai/v3/user/balance';
+  else if (kind === 'novita') url = 'https://api.novita.ai/openapi/v1/billing/balance/detail';
   else {
     const usageUrl = sub2ApiUsageUrl(baseUrl);
     if (!usageUrl) return null;
     url = usageUrl;
   }
 
-  const json = await requestJson(url, apiKey, request);
+  const queryApiKey = kind === 'openrouter'
+    ? options.credentials?.openrouter?.managementKey ?? ''
+    : apiKey;
+  if (!queryApiKey) return null;
+  const json = await requestJson(url, queryApiKey, request);
   if (kind === 'kimi-api') {
     const international = new URL(baseUrl).hostname === 'api.moonshot.ai';
     const balance = parseKimiBalance(json, international);

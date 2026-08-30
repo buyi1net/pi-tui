@@ -35,4 +35,7 @@ export interface ProviderCredentials {
     organizationId: string;
     projectId: string;
   };
+  openrouter?: {
+    managementKey: string;
+  };
 }
