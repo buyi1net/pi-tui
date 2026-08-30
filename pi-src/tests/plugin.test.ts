@@ -186,10 +186,18 @@ test("Footer 第二行按宽度依次降级 Token、Cache 和 Context", () => {
 	const narrow = stripTerminalSequences(footer.render(21)[0] ?? "");
 
 	assert.match(wide, /↑41k ↓11k R40k · CH99\.5% · 💬 T1 · 🪟 18\.3k\/1M · 📦 Auto（C2）/);
-	assert.match(compact, /R40k · CH99\.5% · 🪟 18\.3k\/1M/);
+	assert.ok(visibleWidth(compact) <= 29);
+	assert.match(compact, /🪟 18\.3k\/1M/);
 	assert.doesNotMatch(compact, /↑41k|↓11k|Auto|Off/);
+	assert.ok(visibleWidth(narrow) <= 19);
 	assert.match(narrow, /🪟 18\.3k\/1M/);
 	assert.doesNotMatch(narrow, /↑41k|↓11k|R40k|CH99\.5%|Auto|Off/);
+
+	for (let width = 1; width <= 160; width++) {
+		for (const line of footer.render(width)) {
+			assert.ok(visibleWidth(line) <= width, `Footer line exceeds ${width} columns`);
+		}
+	}
 	footer.dispose();
 });
 

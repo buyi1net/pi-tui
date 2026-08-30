@@ -131,8 +131,19 @@ export class ProjectStatusFooter implements Component {
 				: this.settings.footerUsage,
 			this.getAutoCompactionEnabled(),
 		);
+		// 行首图标属于状态行的一部分，必须先从可用宽度中扣除；最后的截断
+		// 只是防御性兜底，避免宽字符或第三方状态文本再次把整行顶出终端。
+		const usageIconText = formatLeadingIcon(glyphs.usage);
+		const usageIconWidth = visibleWidth(usageIconText);
+		const usageSegmentsWidth = Math.max(0, contentWidth - usageIconWidth);
+		const renderedUsageSegments = usageSegmentsWidth > 0
+			? renderStatusLineSegments(usageSegments, usageSegmentsWidth, this.theme.fg("muted", " · "))
+			: "";
 		const usageLine = usageSegments.length > 0
-			? `${this.theme.fg("muted", formatLeadingIcon(glyphs.usage))}${renderStatusLineSegments(usageSegments, contentWidth, this.theme.fg("muted", " · "))}`
+			? truncateToWidth(
+				`${this.theme.fg("muted", usageIconText)}${renderedUsageSegments}`,
+				contentWidth,
+			)
 			: "";
 		const showExtensions = this.settings.footerExtra.includes("extensions");
 		const statuses = showExtensions
