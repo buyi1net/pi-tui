@@ -25,10 +25,11 @@ export type BuiltinQueryKind =
   | 'copilot-subscription'
   | 'grok-subscription'
   | 'zhipu'
-  | 'kimi'
+  | 'kimi-coding'
+  | 'volcengine-agent'
+  | 'volcengine-coding'
   | 'minimax-cn'
   | 'minimax-en'
-  | 'volcengine'
   | 'deepseek'
   | 'stepfun'
   | 'siliconflow-cn'
@@ -173,7 +174,7 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
     'Kimi For Coding',
     [route('api.kimi.com', '/coding')],
     'api-key',
-    'kimi',
+    'kimi-coding',
     [],
     'kimi',
     'Coding Plan',
@@ -184,7 +185,7 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
     '火山 Agent Plan',
     [route('ark.cn-beijing.volces.com', '/api/plan')],
     'extra-credentials',
-    'volcengine',
+    'volcengine-agent',
     ['火山Agentplan'],
     'volcengine',
     'Agent Plan',
@@ -195,7 +196,7 @@ export const OFFICIAL_PROVIDERS: readonly ProviderCatalogEntry[] = [
     '火山 Coding Plan',
     [route('ark.cn-beijing.volces.com', '/api/coding')],
     'extra-credentials',
-    'volcengine',
+    'volcengine-coding',
     [],
     'volcengine',
     'Coding Plan',

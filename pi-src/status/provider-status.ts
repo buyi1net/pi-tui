@@ -59,7 +59,7 @@ export interface EditorProviderSegments {
 }
 
 function providerBrand(brandName: string): string {
-	return sanitizeSingleLine(brandName) || "Provider";
+	return sanitizeSingleLine(brandName);
 }
 
 /** 订阅额度窗口全部进入顶边 subscription 段；紧凑形态去掉重置倒计时。 */
@@ -105,7 +105,7 @@ export function buildEditorProviderSegments(
 	return {
 		provider: {
 			id: "provider",
-			text: colorProviderBrand(theme, brand),
+			text: brand ? colorProviderBrand(theme, brand) : "",
 			priority: 4,
 		},
 		balance: snapshot?.balance && (snapshot.billingMode === "api" || snapshot.billingMode === "hybrid")

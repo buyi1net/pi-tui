@@ -3,6 +3,7 @@ import test from "node:test";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import {
 	normalizeUsageSnapshot,
+	resolveProviderMetadata,
 	type UsageSnapshot,
 } from "../../packages/usage-core/index.ts";
 import {
@@ -28,6 +29,24 @@ function snapshot(provider: string, fetchedAt: number): UsageSnapshot {
 		freshness: "fresh",
 	};
 }
+
+test("未知中转根据明确模型名显示官方供应商，但不改变查询路由", () => {
+	const metadata = resolveProviderMetadata(
+		"https://relay.example/v1",
+		"relay",
+		"deepseek-chat",
+	);
+	assert.deepEqual(metadata, { providerId: "deepseek", brandName: "DeepSeek" });
+});
+
+test("未知中转的无法识别模型隐藏供应商显示", () => {
+	const metadata = resolveProviderMetadata(
+		"https://relay.example/v1",
+		"my-relay",
+		"custom-model",
+	);
+	assert.deepEqual(metadata, { providerId: "my-relay", brandName: "" });
+});
 
 test("Pi adapter 使用宿主解析后的地址和凭据生成不可逆账号身份", async () => {
 	const model = {

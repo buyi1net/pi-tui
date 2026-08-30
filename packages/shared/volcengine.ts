@@ -178,12 +178,14 @@ export async function fetchVolcengineQuota(
   accessKeyId: string,
   secretAccessKey: string,
   request: typeof fetch = fetch,
+  plan: 'agent' | 'coding' = 'agent',
 ): Promise<QuotaInfo | null> {
   if (!accessKeyId || !secretAccessKey) return null;
   const region = volcengineRegion(baseUrl);
+  if (plan === 'coding') {
+    const coding = await callVolcengine('GetCodingPlanUsage', region, accessKeyId, secretAccessKey, request);
+    return parseVolcengineCodingPlan(coding);
+  }
   const agent = await callVolcengine('GetAFPUsage', region, accessKeyId, secretAccessKey, request);
-  const agentQuota = parseVolcengineAgentPlan(agent);
-  if (agentQuota) return agentQuota;
-  const coding = await callVolcengine('GetCodingPlanUsage', region, accessKeyId, secretAccessKey, request);
-  return parseVolcengineCodingPlan(coding);
+  return parseVolcengineAgentPlan(agent);
 }

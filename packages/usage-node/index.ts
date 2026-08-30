@@ -48,6 +48,7 @@ export interface UsageRuntimeState {
 
 export interface CreateProviderAccessInput {
 	providerId: string;
+	modelId?: string;
 	endpoint: string;
 	credential: string;
 	authKind?: "api-key" | "oauth";
@@ -141,13 +142,14 @@ export class FileUsageSnapshotCache implements UsageSnapshotCache {
 
 export function createProviderAccess(input: CreateProviderAccessInput): ProviderAccess {
 	const endpoint = normalizeEndpoint(input.endpoint);
-	const metadata = resolveProviderMetadata(endpoint, input.providerId);
+	const metadata = resolveProviderMetadata(endpoint, input.providerId, input.modelId);
 	const stableOAuthAccount = input.authKind === "oauth" && input.accountId
 		? input.accountId
 		: null;
 	const accountFingerprint = createHash("sha256")
 		.update(JSON.stringify({
 			credential: stableOAuthAccount ? null : input.credential,
+			modelId: input.modelId ?? null,
 			query: input.query ?? null,
 			credentials: input.credentials ?? null,
 			accountId: stableOAuthAccount,
@@ -162,8 +164,9 @@ export function createProviderAccess(input: CreateProviderAccessInput): Provider
 			accountFingerprint,
 		},
 		credential: input.credential,
-		options: input.authKind || input.query || input.credentials || input.accountId || input.githubDomain
+		options: input.authKind || input.query || input.credentials || input.accountId || input.githubDomain || input.modelId
 			? {
+				modelId: input.modelId,
 				authKind: input.authKind,
 				accountId: input.accountId,
 				githubDomain: input.githubDomain,
@@ -205,7 +208,7 @@ export async function queryProviderUsage(
 	if (!explicitQuery && kind.endsWith("-subscription") && access.options?.authKind !== "oauth") {
 		return { status: "unsupported" };
 	}
-	if (!explicitQuery && !access.credential && kind !== "volcengine") return { status: "unsupported" };
+	if (!explicitQuery && !access.credential && !kind.startsWith("volcengine-")) return { status: "unsupported" };
 
 	const usage = await fetchProviderUsage(
 		kind,
@@ -223,7 +226,11 @@ export async function queryProviderUsage(
 	if (!usage) return { status: "failed" };
 
 	const providerId = usage.quota?.provider ?? explicitQuery?.id ?? access.identity.providerId;
-	const metadata = resolveProviderMetadata(access.identity.endpoint, providerId);
+	const metadata = resolveProviderMetadata(
+		access.identity.endpoint,
+		providerId,
+		access.options?.modelId,
+	);
 	return {
 		status: "success",
 		snapshot: normalizeUsageSnapshot({
@@ -279,7 +286,11 @@ export class UsageRuntime {
 		}
 
 		const key = providerAccessKey(access);
-		const metadata = resolveProviderMetadata(access.identity.endpoint, access.identity.providerId);
+		const metadata = resolveProviderMetadata(
+			access.identity.endpoint,
+			access.identity.providerId,
+			access.options?.modelId,
+		);
 		const provider = { id: metadata.providerId, brandName: metadata.brandName };
 		if (key !== this.activeKey) {
 			this.activeKey = key;

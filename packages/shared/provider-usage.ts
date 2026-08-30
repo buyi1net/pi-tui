@@ -393,7 +393,7 @@ export async function fetchProviderUsage(
   if (kind === 'grok-subscription') {
     return fetchGrokSubscription(options.oauthToken ?? '', request).catch(() => null);
   }
-  if (kind === 'unknown' || (!apiKey && kind !== 'volcengine')) return null;
+  if (kind === 'unknown' || (!apiKey && !kind.startsWith('volcengine-'))) return null;
 
   if (kind === 'zhipu') {
     const team = options.credentials?.zhipuTeam;
@@ -417,7 +417,7 @@ export async function fetchProviderUsage(
     const balance: DeepSeekBalance | null = await fetchDeepSeekBalance(apiKey, request).catch(() => null);
     return balance ? { mode: 'api', balance } : null;
   }
-  if (kind === 'volcengine') {
+  if (kind === 'volcengine-agent' || kind === 'volcengine-coding') {
     const credentials = options.credentials?.volcengine;
     if (!credentials) return null;
     const quota = await fetchVolcengineQuota(
@@ -425,12 +425,13 @@ export async function fetchProviderUsage(
       credentials.accessKeyId,
       credentials.secretAccessKey,
       request,
+      kind === 'volcengine-agent' ? 'agent' : 'coding',
     ).catch(() => null);
     return quota ? { mode: 'subscription', quota } : null;
   }
 
   let url: string;
-  if (kind === 'kimi') url = 'https://api.kimi.com/coding/v1/usages';
+  if (kind === 'kimi-coding') url = 'https://api.kimi.com/coding/v1/usages';
   else if (kind === 'minimax-cn') url = 'https://api.minimaxi.com/v1/api/openplatform/coding_plan/remains';
   else if (kind === 'minimax-en') url = 'https://api.minimax.io/v1/api/openplatform/coding_plan/remains';
   else if (kind === 'stepfun') url = 'https://api.stepfun.com/v1/accounts';
@@ -445,7 +446,7 @@ export async function fetchProviderUsage(
   }
 
   const json = await requestJson(url, apiKey, request);
-  if (kind === 'kimi') {
+  if (kind === 'kimi-coding') {
     const quota = parseKimiQuota(json);
     return quota ? { mode: 'subscription', quota } : null;
   }

@@ -2,7 +2,10 @@ import {
 	findProviderById,
 	findProviderByUrl,
 } from "../shared/provider-catalog.ts";
-import { displayProviderName } from "../shared/provider-display.ts";
+import {
+	displayProviderName,
+	inferModelProviderName,
+} from "../shared/provider-display.ts";
 import type {
 	BillingMode as SharedBillingMode,
 	ProviderCredentials,
@@ -28,6 +31,7 @@ export interface ProviderAccess {
 export type ProviderQueryAccess = ProviderQueryConfig;
 
 export interface ProviderAccessOptions {
+	modelId?: string;
 	authKind?: "api-key" | "oauth";
 	accountId?: string;
 	githubDomain?: string;
@@ -78,15 +82,17 @@ export function normalizeEndpoint(endpoint: string): string {
 export function resolveProviderMetadata(
 	endpoint: string,
 	providerHint = "",
+	modelId = "",
 ): { providerId: string; brandName: string } {
 	const normalizedEndpoint = normalizeEndpoint(endpoint);
 	const catalog =
 		(normalizedEndpoint ? findProviderByUrl(normalizedEndpoint) : undefined) ??
 		(providerHint ? findProviderById(providerHint) : undefined);
-	const providerId = catalog?.brandId ?? (providerHint.trim() || "unknown");
+	const inferredProviderId = !catalog ? inferModelProviderName(modelId) : undefined;
+	const providerId = catalog?.brandId ?? inferredProviderId ?? (providerHint.trim() || "unknown");
 	return {
 		providerId,
-		brandName: catalog?.displayName ?? displayProviderName(providerId),
+		brandName: catalog?.displayName ?? (inferredProviderId ? displayProviderName(providerId) : ""),
 	};
 }
 

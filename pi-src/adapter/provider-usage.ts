@@ -59,6 +59,7 @@ export async function resolvePiProviderAccess(
 		const endpoint = auth.baseUrl ?? model.baseUrl;
 		return createProviderAccess({
 			providerId: model.provider,
+			modelId: model.id,
 			endpoint,
 			credential,
 			authKind: ctx.modelRegistry.isUsingOAuth(model) ? "oauth" : "api-key",

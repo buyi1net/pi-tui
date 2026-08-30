@@ -33,6 +33,21 @@ test("API 计费成功后生成编辑框左上角的供应商与余额段", () =
 	assert.equal(buildEditorProviderSegments(api, theme)?.subscription, null);
 });
 
+test("未知供应商不显示供应商字段", () => {
+	const unknown = state({
+		provider: { id: "my-relay", brandName: "" },
+		billingMode: "api",
+		balance: null,
+		windows: [],
+		fetchedAt: 1,
+		freshness: "fresh",
+	});
+
+	assert.equal(buildEditorProviderSegments(unknown, theme)?.provider.text, "");
+	assert.equal(buildEditorProviderSegments(unknown, theme)?.balance, null);
+	assert.equal(buildEditorProviderSegments(unknown, theme)?.subscription, null);
+});
+
 test("订阅计费只生成额度窗口行，不伪造余额", () => {
 	const subscription = state({
 		provider: { id: "zhipu", brandName: "Zhipu" },
